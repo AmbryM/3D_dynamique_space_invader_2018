@@ -300,24 +300,51 @@ void main(void) {
     }
 
     function handleKeys() {
-        if (currentlyPressedKeys[33]) {
-            // Page Up (par exemple)
-            // faire quelque chose... 
-        }
         // Barre espace
         if (currentlyPressedKeys[32]){
             // Ajout d'un tir
             addTir();
-            
+        }
+        // Fleche gauche
+        if (currentlyPressedKeys[37]){
+            if(spaceship.getPosition()[0] > (-1 + (spaceship.width/2))){
+                var newx = spaceship.getPosition()[0] - 0.03;
+                var newy = spaceship.getPosition()[1];
+                spaceship.setPosition(newx, newy);
+            }
+        }
+        // Fleche haut
+        if (currentlyPressedKeys[38]){
+            if(spaceship.getPosition()[1] < (1 - (spaceship.height/2))){
+                var newx = spaceship.getPosition()[0];
+                var newy = spaceship.getPosition()[1] + 0.03;
+                spaceship.setPosition(newx, newy);
+            }
+        }
+        // Fleche droite
+        if (currentlyPressedKeys[39]){
+            if(spaceship.getPosition()[0] < (1 - (spaceship.width/2))){
+                var newx = spaceship.getPosition()[0] + 0.03;
+                var newy = spaceship.getPosition()[1];
+                spaceship.setPosition(newx, newy);
+            }
+        }
+        // Fleche bas
+        if (currentlyPressedKeys[40]){
+            if(spaceship.getPosition()[1] > (-1 + (spaceship.height/2))){
+                var newx = spaceship.getPosition()[0];
+                var newy = spaceship.getPosition()[1] - 0.03;
+                spaceship.setPosition(newx, newy);    
+            }
         }
     }
 
     function mouseMove(event) {
         // controle de la position du vaisseau en fonction de la souris
         // la position est remappée entre -1 et 1 pour cela
-        var newx = 2.0*(event.clientX/gl.viewportWidth)-1.0;
-        var newy = -(2.0*(event.clientY/gl.viewportHeight)-1.0);
-        spaceship.setPosition(newx,newy);
+        // var newx = 2.0*(event.clientX/gl.viewportWidth)-1.0;
+        // var newy = -(2.0*(event.clientY/gl.viewportHeight)-1.0);
+        // spaceship.setPosition(newx,newy);
     }
 
 
