@@ -238,8 +238,8 @@ void main(void) {
     var heightfield; // l'objet heightfield, sa géométrie, son shader
     var background; // l'objet background, sa géométrie, son shader
     var spaceship; // l'objet spaceship, sa géométrie, son shader
-    var enemy; // l'objet enemy, sa géométrie, son shader
     var tirs = [];
+    var enemies = [];
 
     function drawScene() {
         // initialisation du viewport
@@ -269,15 +269,19 @@ void main(void) {
         spaceship.sendUniformVariables();
         spaceship.draw();
 
-        gl.useProgram(enemy.shader());
-        enemy.sendUniformVariables();
-        enemy.draw();
-
         if(tirs.length != 0){
             gl.useProgram(tirs[0].shader());
             for (var i = 0; i < tirs.length; i++) {
                 tirs[i].sendUniformVariables();
                 tirs[i].draw();
+            }
+        }
+
+        if(enemies != 0){
+            gl.useProgram(enemies[0].shader());
+            for (var i = 0; i < enemies.length; i++) {
+                enemies[i].sendUniformVariables();
+                enemies[i].draw();
             }
         }
     }
@@ -327,9 +331,11 @@ void main(void) {
             heightfield.setParameters(elapsed);
             spaceship.setParameters(elapsed);
             background.setParameters(elapsed);
-            enemy.setParameters(elapsed);
             for (var i = 0; i < tirs.length; i++) {
                 tirs[i].setParameters(elapsed);
+            }
+            for (var i = 0; i < enemies.length; i++) {
+                enemies[i].setParameters(elapsed);
             }
         }
         lastTime = timeNow;
@@ -340,6 +346,9 @@ void main(void) {
         handleKeys();
         drawScene();
         animate();
+        manageEnemies();
+        updateTirs();
+        updateEnemies();
     }
 
     function addTir(){
@@ -353,6 +362,37 @@ void main(void) {
         }
     }
 
+    function updateTirs(){
+        for (var i = 0; i < tirs.length; i++) {
+            if(tirs[i].position[1] > 1){
+                tirs.splice(i, 1);
+            }
+        }
+    }
+
+    function updateEnemies(){
+        for (var i = 0; i < enemies.length; i++) {
+            if(enemies[i].position[1] < (-1 - enemies[i].height)){
+                enemies.splice(i, 1);
+            }
+        }
+    }
+
+    function manageEnemies(){
+        var timeNow = new Date().getTime();
+        if(timeNow - lastEnemy > enemyCooldownTime){
+            var enemy = new Enemy();
+            var x = RandomMinMax(-1, 1);
+            var y = 1 + enemy.height;
+            enemy.setPosition(x, y);
+            enemies.push(enemy);
+            lastEnemy = timeNow;
+        }
+    }
+
+    function RandomMinMax(min, max){
+        return Math.random() * (max - min) + min;
+    }
 
     function webGLStart() {
         // initialisation du canvas et des objets OpenGL
@@ -373,11 +413,14 @@ void main(void) {
         heightfield = new Heightfield();
         background = new Background(fbo.texture(0));
         spaceship = new Spaceship();
-        enemy = new Enemy();
 
         // init temps entre chaque tir
         fireTime = 300;
         lastShot = new Date().getTime();
+
+        // init temps entre chaque ennemies
+        enemyCooldownTime = 300;
+        lastEnemy = new Date().getTime();
 
         // la couleur de fond sera noire
         gl.clearColor(0.0, 0.0, 0.0, 1.0);
