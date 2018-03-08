@@ -10,6 +10,7 @@
 <script type="text/javascript" src="background.js"></script>
 <script type="text/javascript" src="spaceship.js"></script>
 <script type="text/javascript" src="enemy.js"></script>
+<script type="text/javascript" src="tir.js"></script>
 
 <script id="heightfield-vs" type="x-shader/x-vertex">
     // *** le vertex shader *** 
@@ -238,6 +239,7 @@ void main(void) {
     var background; // l'objet background, sa géométrie, son shader
     var spaceship; // l'objet spaceship, sa géométrie, son shader
     var enemy; // l'objet enemy, sa géométrie, son shader
+    var tirs = [];
 
     function drawScene() {
         // initialisation du viewport
@@ -270,6 +272,14 @@ void main(void) {
         gl.useProgram(enemy.shader());
         enemy.sendUniformVariables();
         enemy.draw();
+
+        if(tirs.length != 0){
+            gl.useProgram(tirs[0].shader());
+            for (var i = 0; i < tirs.length; i++) {
+                tirs[i].sendUniformVariables();
+                tirs[i].draw();
+            }
+        }
     }
 
     // une bonne manière de gerer les evenements claviers
@@ -289,6 +299,12 @@ void main(void) {
         if (currentlyPressedKeys[33]) {
             // Page Up (par exemple)
             // faire quelque chose... 
+        }
+        // Barre espace
+        if (currentlyPressedKeys[32]){
+            // Ajout d'un tir
+            addTir();
+            
         }
     }
 
@@ -312,6 +328,9 @@ void main(void) {
             spaceship.setParameters(elapsed);
             background.setParameters(elapsed);
             enemy.setParameters(elapsed);
+            for (var i = 0; i < tirs.length; i++) {
+                tirs[i].setParameters(elapsed);
+            }
         }
         lastTime = timeNow;
     }
@@ -321,6 +340,17 @@ void main(void) {
         handleKeys();
         drawScene();
         animate();
+    }
+
+    function addTir(){
+        var timeNow = new Date().getTime();
+        if(timeNow - lastShot > fireTime){
+            var position = spaceship.getPosition();
+            var tir = new Tir();
+            tir.setPosition(position[0], position[1]);
+            tirs.push(tir);
+            lastShot = timeNow;
+        }
     }
 
 
@@ -337,12 +367,17 @@ void main(void) {
         initBackgroundShader();
         initSpaceshipShader();
         initEnemyShader();
+        initTirShader();
 
         // init de tous les objets
         heightfield = new Heightfield();
         background = new Background(fbo.texture(0));
         spaceship = new Spaceship();
         enemy = new Enemy();
+
+        // init temps entre chaque tir
+        fireTime = 300;
+        lastShot = new Date().getTime();
 
         // la couleur de fond sera noire
         gl.clearColor(0.0, 0.0, 0.0, 1.0);

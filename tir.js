@@ -63,7 +63,7 @@ function Tir() {
     this.triangles.numItems = 6;
 }
 
-Enemy.prototype.initParameters = function() {
+Tir.prototype.initParameters = function() {
     this.width = 0.05;
     this.height = 0.2;
     this.position = [0.0, -0.5];
@@ -71,7 +71,7 @@ Enemy.prototype.initParameters = function() {
     this.texture = null;
 }
 
-Enemy.prototype.setParameters = function(elapsed) {
+Tir.prototype.setParameters = function(elapsed) {
     switch (this.etat){
         case 0:
             this.deplacer(elapsed);
@@ -82,31 +82,31 @@ Enemy.prototype.setParameters = function(elapsed) {
     }
 }
 
-Enemy.prototype.deplacer = function(elapsed){
+Tir.prototype.deplacer = function(elapsed){
     this.position[1] += elapsed/1000 * 1.1;
 }
 
-Enemy.prototype.toucher = function(elapsed){
+Tir.prototype.toucher = function(elapsed){
 
 }
 
-Enemy.prototype.getPosition = function(elapsed){
+Tir.prototype.getPosition = function(elapsed){
     return this.position;
 }
 
-Enemy.prototype.setPosition = function(x,y) {
+Tir.prototype.setPosition = function(x,y) {
     this.position = [x,y];
 }
 
-Enemy.prototype.shader = function() {
+Tir.prototype.shader = function() {
     return tirShader;
 }
 
-Enemy.prototype.sendUniformVariables = function() {
+Tir.prototype.sendUniformVariables = function() {
     gl.uniform2fv(tirShader.positionUniform,this.position);
 }
 
-Enemy.prototype.draw = function() {
+Tir.prototype.draw = function() {
     // active le buffer de position et fait le lien avec l'attribut aVertexPosition dans le shader
     gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
     gl.vertexAttribPointer(tirShader.vertexPositionAttribute, this.vertexBuffer.itemSize, gl.FLOAT, false, 0, 0);

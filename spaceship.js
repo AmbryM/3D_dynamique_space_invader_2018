@@ -77,6 +77,10 @@ Spaceship.prototype.setParameters = function(elapsed) {
 	// on pourrait animer des choses ici
 }
 
+Spaceship.prototype.getPosition = function(){
+	return this.position;
+}
+
 Spaceship.prototype.setPosition = function(x,y) {
 	this.position = [x,y];
 }
