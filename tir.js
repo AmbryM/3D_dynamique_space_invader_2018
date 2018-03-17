@@ -2,20 +2,21 @@ var tirShader;
 
 function initTirShader() {
     tirShader = initShaders("tir-vs","tir-fs");
-    
+
     // active ce shader
     gl.useProgram(tirShader);
 
     // recupere la localisation de l'attribut dans lequel on souhaite acceder aux positions
     tirShader.vertexPositionAttribute = gl.getAttribLocation(tirShader, "aVertexPosition");
-    gl.enableVertexAttribArray(tirShader.vertexPositionAttribute); // active cet attribut 
+    gl.enableVertexAttribArray(tirShader.vertexPositionAttribute); // active cet attribut
 
-    // pareil pour les coordonnees de texture 
+    // pareil pour les coordonnees de texture
     tirShader.vertexCoordAttribute = gl.getAttribLocation(tirShader, "aVertexCoord");
     gl.enableVertexAttribArray(tirShader.vertexCoordAttribute);
 
      // adresse de la variable uniforme uOffset dans le shader
     tirShader.positionUniform = gl.getUniformLocation(tirShader, "uPosition");
+    tirShader.maTextureUniform = gl.getUniformLocation(tirShader, "uMaTexture");
 }
 
 function Tir() {
@@ -40,21 +41,21 @@ function Tir() {
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
     this.vertexBuffer.itemSize = 3;
     this.vertexBuffer.numItems = 4;
-        
+
     // meme principe pour les couleurs
     this.coordBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, this.coordBuffer);
     var coords = [
-         0.0, 0.0, 
-         1.0, 0.0, 
-         1.0, 1.0, 
+         0.0, 0.0,
+         1.0, 0.0,
+         1.0, 1.0,
          0.0, 1.0
     ];
 
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(coords), gl.STATIC_DRAW);
     this.coordBuffer.itemSize = 2;
     this.coordBuffer.numItems = 4;
-    
+
     // creation des faces du cube (les triangles) avec les indices vers les sommets
     this.triangles = gl.createBuffer();
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.triangles);
@@ -119,5 +120,3 @@ Tir.prototype.draw = function() {
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.triangles);
     gl.drawElements(gl.TRIANGLES, this.triangles.numItems, gl.UNSIGNED_SHORT, 0);
 }
-
-
