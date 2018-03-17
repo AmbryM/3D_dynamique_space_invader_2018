@@ -12,6 +12,7 @@
 <script type="text/javascript" src="spaceship.js"></script>
 <script type="text/javascript" src="enemy.js"></script>
 <script type="text/javascript" src="tir.js"></script>
+<script type="text/javascript" src="EnnemyManager.js"></script>
 
 <script id="heightfield-vs" type="x-shader/x-vertex">
     // *** le vertex shader ***
@@ -193,16 +194,16 @@ void main(void) {
     }
 </script>
 <script id="enemy-fs" type="x-shader/x-fragment">
-// *** le fragment shader ***
-precision highp float; // precision des nombres flottant
+	// *** le fragment shader ***
+	precision highp float; // precision des nombres flottant
 
-varying vec2 vTextureCoord; // recuperation de la coord rasterisee
+	varying vec2 vTextureCoord; // recuperation de la coord rasterisee
 
-void main(void) {
-    // couleur par defaut du vaisseau... a changer
-    gl_FragColor = vec4(1.0,1.0,0.0,1.0);
+	uniform sampler2D uMaTexture; // la texture en entree
 
-}
+	void main(void) {
+		 gl_FragColor = texture2D(uMaTexture,vTextureCoord);
+	}
 </script>
 
 <script id="tir-vs" type="x-shader/x-vertex">
@@ -224,11 +225,14 @@ void main(void) {
 <script id="tir-fs" type="x-shader/x-fragment">
 // *** le fragment shader ***
 precision highp float; // precision des nombres flottant
+
 varying vec2 vTextureCoord; // recuperation de la coord rasterisee
-void main(void) {
-    // couleur par defaut du vaisseau... a changer
-    gl_FragColor = vec4(0.0,1.0,0.0,1.0);
-}
+
+	uniform sampler2D uMaTexture; // la texture en entree
+
+	void main(void) {
+		 gl_FragColor = texture2D(uMaTexture,vTextureCoord);
+	}
 </script>
 
 <script type="text/javascript">
@@ -242,13 +246,11 @@ void main(void) {
     var enemies = [];
 
     var textureShip;
-    // var textureLaser;
-    // var textureExplosion;
-    // var textureEnnemy1;
-    // var textureEnnemy2;
-    // var textureEnnemy3;
-
+    var textureLaser;
     var textureExplosion;
+    var textureEnnemy1;
+    var textureEnnemy2;
+    var textureEnnemy3;
 
     function handleLoadedTexture(texture) {
         // active la texture (les operations qui suivent feront effet sur celle-ci)
@@ -270,14 +272,48 @@ void main(void) {
 
     function initTexture() {
 
-        // initTextureExplosion();
+        textureExplosion = gl.createTexture();
+	    textureExplosion.image = new Image();
+	    textureExplosion.image.onload = function () {
+	    	handleLoadedTexture(textureExplosion);
+	    }
+	    textureExplosion.image.src = "sprites/explosion.png";
         // creation de la texture
         textureShip = gl.createTexture();
         textureShip.image = new Image();
         textureShip.image.onload = function () {
             handleLoadedTexture(textureShip)
         }
-        textureShip.image.src = "sprites/spaceship.png";
+        textureShip.image.src = "sprites/spaceship_doritos.png";
+
+        textureLaser = gl.createTexture();
+        textureLaser.image = new Image();
+        textureLaser.image.onload = function () {
+            handleLoadedTexture(textureLaser)
+        }
+        textureLaser.image.src = "sprites/laser.png";
+
+        //Chargement des textures des ennemis
+        textureEnnemy1 = gl.createTexture();
+        textureEnnemy1.image = new Image();
+        textureEnnemy1.image.onload = function () {
+            handleLoadedTexture(textureEnnemy1)
+        }
+        textureEnnemy1.image.src = "sprites/ennemy1.png";
+        textureEnnemy2 = gl.createTexture();
+        textureEnnemy2.image = new Image();
+        textureEnnemy2.image.onload = function () {
+            handleLoadedTexture(textureEnnemy2)
+        }
+        textureEnnemy2.image.src = "sprites/ennemy2.png";
+        textureEnnemy3 = gl.createTexture();
+        textureEnnemy3.image = new Image();
+        textureEnnemy3.image.onload = function () {
+            handleLoadedTexture(textureEnnemy3)
+        }
+        textureEnnemy3.image.src = "sprites/ennemy3.png";
+
+
 
     }
 
@@ -317,21 +353,31 @@ void main(void) {
 		gl.uniform1i(spaceship.shader().maTextureUniform, 0); // on dit au shader que maTextureUniform se trouve sur l'unite de texture 0
         spaceship.draw();
 
-        if(tirs.length != 0){
-            gl.useProgram(tirs[0].shader());
-            for (var i = 0; i < tirs.length; i++) {
-                tirs[i].sendUniformVariables();
-                tirs[i].draw();
-            }
-        }
+        if(enemies.length != 0)
+        {
+			gl.useProgram(enemies[0].shader());
+			for(i=0;i<enemies.length;i++)
+			{
+				enemies[i].sendUniformVariables();
+				gl.activeTexture(gl.TEXTURE0); // on active l'unite de texture 0
+				gl.bindTexture(gl.TEXTURE_2D,enemies[i].getTexture()); // on place maTexture dans l'unité active
+				gl.uniform1i(enemies[i].shader().maTextureUniform, 0); // on dit au shader que maTextureUniform se trouve sur l'unite de texture 0
+				enemies[i].draw();
+			}
+		}
 
-        if(enemies != 0){
-            gl.useProgram(enemies[0].shader());
-            for (var i = 0; i < enemies.length; i++) {
-                enemies[i].sendUniformVariables();
-                enemies[i].draw();
-            }
-        }
+        if(tirs.length != 0)
+        {
+			gl.useProgram(tirs[0].shader());
+			for(i=0;i<tirs.length;i++)
+			{
+				tirs[i].sendUniformVariables();
+				gl.activeTexture(gl.TEXTURE0); // on active l'unite de texture 0
+				gl.bindTexture(gl.TEXTURE_2D,textureLaser); // on place maTexture dans l'unité active
+				gl.uniform1i(tirs[i].shader().maTextureUniform, 0); // on dit au shader que maTextureUniform se trouve sur l'unite de texture 0
+				tirs[i].draw();
+			}
+		}
     }
 
     // une bonne manière de gerer les evenements claviers
@@ -406,6 +452,8 @@ void main(void) {
             heightfield.setParameters(elapsed);
             spaceship.setParameters(elapsed);
             background.setParameters(elapsed);
+            ennemyManager.setParameters(elapsed);
+
             for (var i = 0; i < tirs.length; i++) {
                 tirs[i].setParameters(elapsed);
             }
@@ -421,10 +469,11 @@ void main(void) {
         handleKeys();
         drawScene();
         animate();
-        manageEnemies();
+        // manageEnemies();
         updateTirs();
         updateEnemies();
     }
+
 
     function addTir(){
         var timeNow = new Date().getTime();
@@ -438,19 +487,54 @@ void main(void) {
     }
 
     function updateTirs(){
-        for (var i = 0; i < tirs.length; i++) {
-            if(tirs[i].position[1] > 1){
-                tirs.splice(i, 1);
-            }
+        for(i=0;i<tirs.length;i++)
+        {
+			if(tirs[i].position[1] > 1)
+			{
+				tirs.splice(i,1);
+			}
+			else
+			{
+				//test collision
+				for(j=0;j<enemies.length;j++)
+				{
+					//console.log(enemies[j].hitbox())
+					// i coin haut gauche
+					// a coin bas droite
+					ix = enemies[j].position[0] - enemies[j].width/2;
+					iy = enemies[j].position[1] - enemies[j].height/2;
+					ax = enemies[j].position[0] + enemies[j].width/2;
+					ay = enemies[j].position[1] + enemies[j].height/2;
+					if( enemies[j].state == 0 && ix <= tirs[i].position[0] && tirs[i].position[0] <= ax && iy <= tirs[i].position[1] && tirs[i].position[1] <= ay  )
+					{
+						enemies[j].updateState(1); // l'ennemi explose
+						tirs.splice(i,1);
+					}
+
+				}
+			}
         }
     }
 
     function updateEnemies(){
-        for (var i = 0; i < enemies.length; i++) {
-            if(enemies[i].position[1] < (-1 - enemies[i].height)){
-                enemies.splice(i, 1);
-            }
+        for(j=0;j<enemies.length;j++)
+        {
+			if(enemies[j].state == 2) // l'ennemi est mort, on l'enleve
+			{enemies.splice(j,1);}
+			else if(enemies[j].position[1] < -1)
+			{
+				enemies.splice(j,1);
+			}
         }
+    }
+
+    function addEnnemy(typeCourbe, x,y, texture)
+    {
+		var enemy = new Enemy();
+		enemy.setPosition(x,y);
+		enemy.setTypeCourbe(typeCourbe);
+		enemy.setTexture(texture);
+		enemies.push(enemy);
     }
 
     function manageEnemies(){
@@ -491,12 +575,14 @@ void main(void) {
         interfac = new Interface();
         background = new Background(fbo.texture(0));
         spaceship = new Spaceship();
+        ennemyManager = new EnnemyManager();
+
 
         // init temps entre chaque tir
         fireTime = 300;
         lastShot = new Date().getTime();
 
-        // init temps entre chaque ennemies
+        // init temps entre chaque enemies
         enemyCooldownTime = 300;
         lastEnemy = new Date().getTime();
 
