@@ -85,6 +85,7 @@ Enemy.prototype.initParameters = function() {
 	this.idExplosion = 0;
 	this.timeSinceLastUpdate = 0;
 	this.position = [0.0,0.0];
+  this.point = 0;
 }
 
 Enemy.prototype.setTexture = function(texture) {
@@ -114,7 +115,7 @@ Enemy.prototype.setParameters = function(elapsed) {
 }
 
 Enemy.prototype.manageExplosion = function(elapsed){
-    var timeNow = new Date().getTime();
+  var timeNow = new Date().getTime();
 	var elapsed = timeNow - this.timeSinceLastUpdate;
 
 	if(elapsed > timeBetweenUpdate)

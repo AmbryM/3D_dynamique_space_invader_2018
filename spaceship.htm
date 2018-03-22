@@ -252,6 +252,13 @@ varying vec2 vTextureCoord; // recuperation de la coord rasterisee
     var textureEnnemy2;
     var textureEnnemy3;
 
+    var score = 0;
+    var distance = 0;
+    var audio = new Audio('audio.mp3');
+    var laser = new Audio('laser.mp3');
+    var boom = new Audio('boom.mp3');
+    var pointUpdate = new Audio('pointUpdate.mp3');
+
     function handleLoadedTexture(texture) {
         // active la texture (les operations qui suivent feront effet sur celle-ci)
         gl.bindTexture(gl.TEXTURE_2D, texture);
@@ -472,6 +479,12 @@ varying vec2 vTextureCoord; // recuperation de la coord rasterisee
         // manageEnemies();
         updateTirs();
         updateEnemies();
+        distance += 1;
+        document.querySelector('.distance').textContent = distance;
+        if ((distance % 1000) == 0) {
+            pointUpdate.play();
+        }
+
     }
 
 
@@ -482,16 +495,22 @@ varying vec2 vTextureCoord; // recuperation de la coord rasterisee
             var tir = new Tir();
             tir.setPosition(position[0], position[1]);
             tirs.push(tir);
+            laser.play();
+
             lastShot = timeNow;
         }
     }
 
     function updateTirs(){
+
+
         for(i=0;i<tirs.length;i++)
         {
 			if(tirs[i].position[1] > 1)
 			{
 				tirs.splice(i,1);
+
+
 			}
 			else
 			{
@@ -501,14 +520,16 @@ varying vec2 vTextureCoord; // recuperation de la coord rasterisee
 					//console.log(enemies[j].hitbox())
 					// i coin haut gauche
 					// a coin bas droite
+
 					ix = enemies[j].position[0] - enemies[j].width/2;
 					iy = enemies[j].position[1] - enemies[j].height/2;
 					ax = enemies[j].position[0] + enemies[j].width/2;
 					ay = enemies[j].position[1] + enemies[j].height/2;
-					if( enemies[j].state == 0 && ix <= tirs[i].position[0] && tirs[i].position[0] <= ax && iy <= tirs[i].position[1] && tirs[i].position[1] <= ay  )
+					if(enemies[j].state == 0 && ix <= tirs[i].position[0] && tirs[i].position[0] <= ax && iy <= tirs[i].position[1] && tirs[i].position[1] <= ay  )
 					{
 						enemies[j].updateState(1); // l'ennemi explose
 						tirs.splice(i,1);
+                        boom.play();
 					}
 
 				}
@@ -517,10 +538,15 @@ varying vec2 vTextureCoord; // recuperation de la coord rasterisee
     }
 
     function updateEnemies(){
+
         for(j=0;j<enemies.length;j++)
         {
 			if(enemies[j].state == 2) // l'ennemi est mort, on l'enleve
-			{enemies.splice(j,1);}
+            {
+                score += 150;
+                document.querySelector('.score').textContent = score;
+	            enemies.splice(j,1);
+            }
 			else if(enemies[j].position[1] < -1)
 			{
 				enemies.splice(j,1);
@@ -554,6 +580,8 @@ varying vec2 vTextureCoord; // recuperation de la coord rasterisee
     }
 
     function webGLStart() {
+
+        document.getElementById("welcome").style.display = 'none';
         // initialisation du canvas et des objets OpenGL
         var canvas = document.getElementById("SpaceShip");
         initGL(canvas);
@@ -579,7 +607,7 @@ varying vec2 vTextureCoord; // recuperation de la coord rasterisee
 
 
         // init temps entre chaque tir
-        fireTime = 300;
+        fireTime = 500;
         lastShot = new Date().getTime();
 
         // init temps entre chaque enemies
@@ -601,6 +629,8 @@ varying vec2 vTextureCoord; // recuperation de la coord rasterisee
         document.onkeydown = handleKeyDown;
         document.onkeyup = handleKeyUp;
 
+        audio.play();
+
         // dessine la scene
         tick();
     }
@@ -612,7 +642,17 @@ varying vec2 vTextureCoord; // recuperation de la coord rasterisee
 </head>
 
 
-<body onload="webGLStart();">
-    <!-- <canvas id="welcome" style="border: none;" width="800" height="800"></canvas> -->
-    <canvas id="SpaceShip" style="border: none;" width="800" height="800"></canvas>
+<body style="background-image: url('http://prodstoreacc4187.blob.core.windows.net/prod-20180205/generic_1517860728712754_ori.jpeg');">
+    <canvas id="SpaceShip" width="800" height="800" style="margin-left: auto; display: block; margin-top: calc(100vh - 900px); margin-right: auto;"></canvas>
+
+    <div class="game-layout" style="width: 800px; height: 75px; background-color: rgba(0,0,0,0.5); position: relative; display: block; top: -800px; margin-left: auto; margin-right: auto;">
+      <div class="life" style="height: 75px; width: 33%; display: inline-block; text-align: center;line-height: 75px;color: white;font-size: 200%; font-family: 'Arial', sans-serif;">100/100</div>
+      <div class="score" style="height: 75px; width: 33%; display: inline-block; text-align: center;line-height: 75px;color: white;font-size: 200%; font-family: 'Arial', sans-serif;">0</div>
+      <div class="distance" style="height: 75px; width: 33%; display: inline-block; text-align: center;line-height: 75px;color: white;font-size: 200%; font-family: 'Arial', sans-serif;">0 m</div>
+    </div>
+
+    <div id="welcome" style="width: 800px; height: 800px; background-color: rgba(0,0,0,1); text-align: center; position: relative; display: block; top: -875px; margin-left: auto; margin-right: auto;">
+        <img onclick="webGLStart();" src="sprites/play.png" alt="" style="margin-top: 336px;">
+    </div>
+
 </body></html>
