@@ -251,6 +251,7 @@ varying vec2 vTextureCoord; // recuperation de la coord rasterisee
     var textureEnnemy1;
     var textureEnnemy2;
     var textureEnnemy3;
+    var textureEnnemy4;
 
     var score = 0;
     var distance = 0;
@@ -307,18 +308,27 @@ varying vec2 vTextureCoord; // recuperation de la coord rasterisee
             handleLoadedTexture(textureEnnemy1)
         }
         textureEnnemy1.image.src = "sprites/ennemy1.png";
+
         textureEnnemy2 = gl.createTexture();
         textureEnnemy2.image = new Image();
         textureEnnemy2.image.onload = function () {
             handleLoadedTexture(textureEnnemy2)
         }
         textureEnnemy2.image.src = "sprites/ennemy2.png";
+
         textureEnnemy3 = gl.createTexture();
         textureEnnemy3.image = new Image();
         textureEnnemy3.image.onload = function () {
             handleLoadedTexture(textureEnnemy3)
         }
         textureEnnemy3.image.src = "sprites/ennemy3.png";
+
+        textureEnnemy4 = gl.createTexture();
+        textureEnnemy4.image = new Image();
+        textureEnnemy4.image.onload = function () {
+            handleLoadedTexture(textureEnnemy4)
+        }
+        textureEnnemy4.image.src = "sprites/ennemy4.png";
 
 
 
@@ -476,7 +486,10 @@ varying vec2 vTextureCoord; // recuperation de la coord rasterisee
         handleKeys();
         drawScene();
         animate();
-        // manageEnemies();
+        setTimeout(
+        function() {
+            manageEnemies();
+        },  19000);
         updateTirs();
         updateEnemies();
         distance += 1;
@@ -570,6 +583,7 @@ varying vec2 vTextureCoord; // recuperation de la coord rasterisee
             var x = RandomMinMax(-1, 1);
             var y = 1 + enemy.height;
             enemy.setPosition(x, y);
+            enemy.setTexture(textureEnnemy4);
             enemies.push(enemy);
             lastEnemy = timeNow;
         }
@@ -608,10 +622,14 @@ varying vec2 vTextureCoord; // recuperation de la coord rasterisee
 
         // init temps entre chaque tir
         fireTime = 500;
+        setTimeout(
+        function() {
+          fireTime = 50;
+        },  19000);
         lastShot = new Date().getTime();
 
         // init temps entre chaque enemies
-        enemyCooldownTime = 300;
+        enemyCooldownTime = 75;
         lastEnemy = new Date().getTime();
 
         // la couleur de fond sera noire
