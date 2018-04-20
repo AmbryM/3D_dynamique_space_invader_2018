@@ -194,16 +194,16 @@ void main(void) {
     }
 </script>
 <script id="enemy-fs" type="x-shader/x-fragment">
-	// *** le fragment shader ***
-	precision highp float; // precision des nombres flottant
+    // *** le fragment shader ***
+    precision highp float; // precision des nombres flottant
 
-	varying vec2 vTextureCoord; // recuperation de la coord rasterisee
+    varying vec2 vTextureCoord; // recuperation de la coord rasterisee
 
-	uniform sampler2D uMaTexture; // la texture en entree
+    uniform sampler2D uMaTexture; // la texture en entree
 
-	void main(void) {
-		 gl_FragColor = texture2D(uMaTexture,vTextureCoord);
-	}
+    void main(void) {
+         gl_FragColor = texture2D(uMaTexture,vTextureCoord);
+    }
 </script>
 
 <script id="tir-vs" type="x-shader/x-vertex">
@@ -228,11 +228,11 @@ precision highp float; // precision des nombres flottant
 
 varying vec2 vTextureCoord; // recuperation de la coord rasterisee
 
-	uniform sampler2D uMaTexture; // la texture en entree
+    uniform sampler2D uMaTexture; // la texture en entree
 
-	void main(void) {
-		 gl_FragColor = texture2D(uMaTexture,vTextureCoord);
-	}
+    void main(void) {
+         gl_FragColor = texture2D(uMaTexture,vTextureCoord);
+    }
 </script>
 
 <script type="text/javascript">
@@ -243,6 +243,7 @@ varying vec2 vTextureCoord; // recuperation de la coord rasterisee
     var background; // l'objet background, sa géométrie, son shader
     var spaceship; // l'objet spaceship, sa géométrie, son shader
     var tirs = [];
+    var tirsE = [];
     var enemies = [];
 
     var textureShip;
@@ -255,6 +256,7 @@ varying vec2 vTextureCoord; // recuperation de la coord rasterisee
 
     var score = 0;
     var distance = 0;
+    var animationRunning = true;
     var audio = new Audio('audio.mp3');
     var laser = new Audio('laser.mp3');
     var boom = new Audio('boom.mp3');
@@ -281,11 +283,11 @@ varying vec2 vTextureCoord; // recuperation de la coord rasterisee
     function initTexture() {
 
         textureExplosion = gl.createTexture();
-	    textureExplosion.image = new Image();
-	    textureExplosion.image.onload = function () {
-	    	handleLoadedTexture(textureExplosion);
-	    }
-	    textureExplosion.image.src = "sprites/explosion.png";
+        textureExplosion.image = new Image();
+        textureExplosion.image.onload = function () {
+            handleLoadedTexture(textureExplosion);
+        }
+        textureExplosion.image.src = "sprites/explosion.png";
         // creation de la texture
         textureShip = gl.createTexture();
         textureShip.image = new Image();
@@ -366,35 +368,46 @@ varying vec2 vTextureCoord; // recuperation de la coord rasterisee
         gl.useProgram(spaceship.shader());
         spaceship.sendUniformVariables();
         gl.activeTexture(gl.TEXTURE0); // on active l'unite de texture 0
-		gl.bindTexture(gl.TEXTURE_2D,textureShip); // on place maTexture dans l'unité active
-		gl.uniform1i(spaceship.shader().maTextureUniform, 0); // on dit au shader que maTextureUniform se trouve sur l'unite de texture 0
+        gl.bindTexture(gl.TEXTURE_2D,textureShip); // on place maTexture dans l'unité active
+        gl.uniform1i(spaceship.shader().maTextureUniform, 0); // on dit au shader que maTextureUniform se trouve sur l'unite de texture 0
         spaceship.draw();
 
         if(enemies.length != 0)
         {
-			gl.useProgram(enemies[0].shader());
-			for(i=0;i<enemies.length;i++)
-			{
-				enemies[i].sendUniformVariables();
-				gl.activeTexture(gl.TEXTURE0); // on active l'unite de texture 0
-				gl.bindTexture(gl.TEXTURE_2D,enemies[i].getTexture()); // on place maTexture dans l'unité active
-				gl.uniform1i(enemies[i].shader().maTextureUniform, 0); // on dit au shader que maTextureUniform se trouve sur l'unite de texture 0
-				enemies[i].draw();
-			}
-		}
+            gl.useProgram(enemies[0].shader());
+            for(i=0;i<enemies.length;i++)
+            {
+                enemies[i].sendUniformVariables();
+                gl.activeTexture(gl.TEXTURE0); // on active l'unite de texture 0
+                gl.bindTexture(gl.TEXTURE_2D,enemies[i].getTexture()); // on place maTexture dans l'unité active
+                gl.uniform1i(enemies[i].shader().maTextureUniform, 0); // on dit au shader que maTextureUniform se trouve sur l'unite de texture 0
+                enemies[i].draw();
+            }
+        }
 
         if(tirs.length != 0)
         {
-			gl.useProgram(tirs[0].shader());
-			for(i=0;i<tirs.length;i++)
-			{
-				tirs[i].sendUniformVariables();
-				gl.activeTexture(gl.TEXTURE0); // on active l'unite de texture 0
-				gl.bindTexture(gl.TEXTURE_2D,textureLaser); // on place maTexture dans l'unité active
-				gl.uniform1i(tirs[i].shader().maTextureUniform, 0); // on dit au shader que maTextureUniform se trouve sur l'unite de texture 0
-				tirs[i].draw();
-			}
-		}
+            gl.useProgram(tirs[0].shader());
+            for(i=0;i<tirs.length;i++)
+            {
+                tirs[i].sendUniformVariables();
+                gl.activeTexture(gl.TEXTURE0); // on active l'unite de texture 0
+                gl.bindTexture(gl.TEXTURE_2D,textureLaser); // on place maTexture dans l'unité active
+                gl.uniform1i(tirs[i].shader().maTextureUniform, 0); // on dit au shader que maTextureUniform se trouve sur l'unite de texture 0
+                tirs[i].draw();
+            }
+        }
+      if(tirsE.length != 0)
+      {
+        gl.useProgram(tirsE[0].shader());
+        for (var i = 0; i < tirsE.length; i++) {
+          tirsE[i].sendUniformVariables();
+          gl.activeTexture(gl.TEXTURE0);
+          gl.bindTexture(gl.TEXTURE_2D, textureLaser);
+          gl.uniform1i(tirsE[i].shader().maTextureUniform, 0);
+          tirsE[i].draw();
+        }
+      }
     }
 
     // une bonne manière de gerer les evenements claviers
@@ -474,14 +487,19 @@ varying vec2 vTextureCoord; // recuperation de la coord rasterisee
             for (var i = 0; i < tirs.length; i++) {
                 tirs[i].setParameters(elapsed);
             }
+            for (var i = 0; i < tirsE.length; i++) {
+                tirsE[i].setParameters(elapsed);
+            }
             for (var i = 0; i < enemies.length; i++) {
                 enemies[i].setParameters(elapsed);
             }
+
         }
         lastTime = timeNow;
     }
 
     function tick() {
+      if(animationRunning){
         requestAnimFrame(tick);
         handleKeys();
         drawScene();
@@ -490,6 +508,7 @@ varying vec2 vTextureCoord; // recuperation de la coord rasterisee
         function() {
             manageEnemies();
         },  19000);
+        updateEnemyTirs();
         updateTirs();
         updateEnemies();
         distance += 1;
@@ -497,7 +516,7 @@ varying vec2 vTextureCoord; // recuperation de la coord rasterisee
         if ((distance % 1000) == 0) {
             pointUpdate.play();
         }
-
+      }
     }
 
 
@@ -514,39 +533,70 @@ varying vec2 vTextureCoord; // recuperation de la coord rasterisee
         }
     }
 
+    function addTirE(enemy){
+      var timeNow = new Date().getTime();
+      if(timeNow - enemy.lastShot > enemy.fireTime){
+        var position = enemy.getPosition();
+        var tir = new TirE();
+        tir.setPosition(position[0], position[1]);
+        tirsE.push(tir);
+        laser.play();
+
+        enemy.lastShot = timeNow;
+      }
+    }
+
+    function updateEnemyTirs(){
+      for (var i = 0; i < tirsE.length; i++) {
+        if(tirsE[i] < 0){
+          tirsE.splice(i, 1);
+        }else{
+          ix = spaceship.position[0] - spaceship.width/2;
+                    iy = spaceship.position[1] - spaceship.height/2;
+                    ax = spaceship.position[0] + spaceship.width/2;
+                    ay = spaceship.position[1] + spaceship.height/2;
+          if(ix <= tirsE[i].position[0] && tirsE[i].position[0] <= ax && iy <= tirsE[i].position[1] && tirsE[i].position[1] <= ay) {
+            tirsE.splice(i, 1);
+            updatePv();
+            boom.play();
+          }
+        }
+      }
+    }
+
     function updateTirs(){
 
 
         for(i=0;i<tirs.length;i++)
         {
-			if(tirs[i].position[1] > 1)
-			{
-				tirs.splice(i,1);
+            if(tirs[i].position[1] > 1)
+            {
+                tirs.splice(i,1);
 
 
-			}
-			else
-			{
-				//test collision
-				for(j=0;j<enemies.length;j++)
-				{
-					//console.log(enemies[j].hitbox())
-					// i coin haut gauche
-					// a coin bas droite
+            }
+            else
+            {
+                //test collision
+                for(j=0;j<enemies.length;j++)
+                {
+                    //console.log(enemies[j].hitbox())
+                    // i coin haut gauche
+                    // a coin bas droite
 
-					ix = enemies[j].position[0] - enemies[j].width/2;
-					iy = enemies[j].position[1] - enemies[j].height/2;
-					ax = enemies[j].position[0] + enemies[j].width/2;
-					ay = enemies[j].position[1] + enemies[j].height/2;
-					if(enemies[j].state == 0 && ix <= tirs[i].position[0] && tirs[i].position[0] <= ax && iy <= tirs[i].position[1] && tirs[i].position[1] <= ay  )
-					{
-						enemies[j].updateState(1); // l'ennemi explose
-						tirs.splice(i,1);
+                    ix = enemies[j].position[0] - enemies[j].width/2;
+                    iy = enemies[j].position[1] - enemies[j].height/2;
+                    ax = enemies[j].position[0] + enemies[j].width/2;
+                    ay = enemies[j].position[1] + enemies[j].height/2;
+                    if(enemies[j].state == 0 && ix <= tirs[i].position[0] && tirs[i].position[0] <= ax && iy <= tirs[i].position[1] && tirs[i].position[1] <= ay  )
+                    {
+                        enemies[j].updateState(1); // l'ennemi explose
+                        tirs.splice(i,1);
                         boom.play();
-					}
+                    }
 
-				}
-			}
+                }
+            }
         }
     }
 
@@ -554,26 +604,35 @@ varying vec2 vTextureCoord; // recuperation de la coord rasterisee
 
         for(j=0;j<enemies.length;j++)
         {
-			if(enemies[j].state == 2) // l'ennemi est mort, on l'enleve
+            if(enemies[j].state == 2) // l'ennemi est mort, on l'enleve
             {
                 score += 150;
                 document.querySelector('.score').textContent = score;
-	            enemies.splice(j,1);
+                enemies.splice(j,1);
             }
-			else if(enemies[j].position[1] < -1)
-			{
-				enemies.splice(j,1);
-			}
+            else if(enemies[j].position[1] < -1)
+            {
+                enemies.splice(j,1);
+            }
         }
+    }
+
+    function updatePv(){
+      spaceship.health -= 20;
+      document.getElementById("health").innerHTML = spaceship.health;
+      if(spaceship.health == 0){
+        animationRunning = false;
+      }
     }
 
     function addEnnemy(typeCourbe, x,y, texture)
     {
-		var enemy = new Enemy();
-		enemy.setPosition(x,y);
-		enemy.setTypeCourbe(typeCourbe);
-		enemy.setTexture(texture);
-		enemies.push(enemy);
+        var enemy = new Enemy();
+        enemy.setPosition(x,y);
+        enemy.setTypeCourbe(typeCourbe);
+        enemy.setTexture(texture);
+        enemies.push(enemy);
+    addTirE(enemy);
     }
 
     function manageEnemies(){
@@ -664,7 +723,7 @@ varying vec2 vTextureCoord; // recuperation de la coord rasterisee
     <canvas id="SpaceShip" width="800" height="800" style="margin-left: auto; display: block; margin-top: calc(100vh - 900px); margin-right: auto;"></canvas>
 
     <div class="game-layout" style="width: 800px; height: 75px; background-color: rgba(0,0,0,0.5); position: relative; display: block; top: -800px; margin-left: auto; margin-right: auto;">
-      <div class="life" style="height: 75px; width: 33%; display: inline-block; text-align: center;line-height: 75px;color: white;font-size: 200%; font-family: 'Arial', sans-serif;">100/100</div>
+      <div class="life" style="height: 75px; width: 33%; display: inline-block; text-align: center;line-height: 75px;color: white;font-size: 200%; font-family: 'Arial', sans-serif;"><span id="health">100</span>/100</div>
       <div class="score" style="height: 75px; width: 33%; display: inline-block; text-align: center;line-height: 75px;color: white;font-size: 200%; font-family: 'Arial', sans-serif;">0</div>
       <div class="distance" style="height: 75px; width: 33%; display: inline-block; text-align: center;line-height: 75px;color: white;font-size: 200%; font-family: 'Arial', sans-serif;">0 m</div>
     </div>

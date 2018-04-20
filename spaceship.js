@@ -72,6 +72,7 @@ Spaceship.prototype.initParameters = function() {
 	this.width = 0.2;
 	this.height = 0.2;
 	this.position = [0.0,-0.7];
+	this.health = 100;
 }
 
 Spaceship.prototype.setParameters = function(elapsed) {

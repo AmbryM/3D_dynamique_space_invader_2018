@@ -85,7 +85,9 @@ Enemy.prototype.initParameters = function() {
 	this.idExplosion = 0;
 	this.timeSinceLastUpdate = 0;
 	this.position = [0.0,0.0];
-  this.point = 0;
+  	this.point = 0;
+  	this.fireTime = 500;
+  	this.lastShot = 0;
 }
 
 Enemy.prototype.setTexture = function(texture) {
@@ -164,100 +166,6 @@ Enemy.prototype.sendUniformVariables = function() {
 	gl.uniform2fv(enemyShader.positionUniform,this.position);
 }
 
-Enemy.prototype.hitbox = function() {
-	return {"x" : this.position[0], "y" : this.position[1], "width" : this.width, "height" : this.height};
-}
-
-Enemy.prototype.setTypeCourbe = function(typeCourbe) {
-	this.typeCourbe = typeCourbe;
-}
-
-Enemy.prototype.initParameters = function() {
-	this.width = 0.2;
-	this.height = 0.2;
-	this.typeCourbe="verticale";
-	this.texture = null;
-	this.state = 0;
-	this.idExplosion = 0;
-	this.timeSinceLastUpdate = 0;
-	this.position = [0.0,0.0];
-}
-
-Enemy.prototype.setTexture = function(texture) {
-	this.texture = texture;
-}
-
-Enemy.prototype.getTexture = function(texture) {
-	return this.texture;
-}
-
-Enemy.prototype.updateState = function(state) {
-	this.state = state;
-}
-
-Enemy.prototype.setParameters = function(elapsed) {
-	switch(this.state)
-	{
-		case 0:
-			this.deplacer(elapsed);
-			break;
-		case 1:
-			this.manageExplosion(elapsed);
-			break;
-		case 2:
-			break;
-	}
-}
-
-Enemy.prototype.manageExplosion = function(elapsed){
-    var timeNow = new Date().getTime();
-	var elapsed = timeNow - this.timeSinceLastUpdate;
-
-	if(elapsed > timeBetweenUpdate)
-	{
-		if(this.idExplosion < 2)
-		{
-			this.setTexture(textureExplosion);
-			this.timeSinceLastUpdate = elapsed;
-		}
-		else
-			this.updateState(2);
-
-		this.idExplosion++;
-	}
-}
-
-Enemy.prototype.deplacer = function(elapsed) {
-	if(this.typeCourbe == "verticale")
-	{
-		this.position[1] -= elapsed/1000;
-	}
-	else if(this.typeCourbe == "cos")
-	{
-		this.position[0] +=  0.02;
-		this.position[1] -= Math.cos(this.position[0]);
-	}
-	else if(this.typeCourbe == "droite")
-	{
-
-	}
-}
-
-Enemy.prototype.setPosition = function(x,y) {
-	this.position = [x,y];
-}
-
-Enemy.prototype.getPosition = function() {
-	return this.position;
-}
-
-Enemy.prototype.shader = function() {
-	return enemyShader;
-}
-
-Enemy.prototype.sendUniformVariables = function() {
-	gl.uniform2fv(enemyShader.positionUniform,this.position);
-}
 
 Enemy.prototype.draw = function() {
     // active le buffer de position et fait le lien avec l'attribut aVertexPosition dans le shader
